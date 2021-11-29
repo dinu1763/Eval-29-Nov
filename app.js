@@ -14,7 +14,8 @@ const jobSchema = new mongoose.Schema({
     skills:{type:String, required:true},
     job_type:{type:String, required:true},
     notice_period : {type:Number, required:true},
-    rating:{type:Number, required:false}
+    rating:{type:Number, required:false},
+    city:{type:String, required:true}
 },{
     versionKey: false,
     timestamps: true
@@ -37,6 +38,26 @@ const Company = mongoose.model("company", companySchema);
 app.get("/company", async (req, res) =>{
     try{
         const company = await Company.find().lean().exec();
+        return res.status(201).send(company);
+    } catch (e){
+        return res.status(500).send({e})
+    }
+});
+
+app.get("/company_details", async (req, res) =>{
+    try{
+        const company = await Company.find({company_name:"Wipro"},{company_description:1, company_name:1}).lean().exec();
+        return res.status(201).send(company);
+    } catch (e){
+        return res.status(500).send({e})
+    }
+});
+
+
+
+app.get("/job_openings", async (req, res) =>{
+    try{
+        const company = await Company.find({job_openings: {$gt:60}}, {company_name:1, job_openings:1}).lean().exec();
         return res.status(201).send(company);
     } catch (e){
         return res.status(500).send({e})
@@ -74,6 +95,42 @@ app.delete("/company/:id", async (req, res) =>{
 app.get("/", async (req, res) =>{
     try{
         const jobs = await Job.find().lean().exec();
+        return res.status(201).send(jobs);
+    } catch (e){
+        return res.status(500).send({e})
+    }
+});
+
+app.get("/bangalore", async (req, res) =>{
+    try{
+        const jobs = await Job.find({$and: [{city:"Bangalore"},{skills:"Python"}]}).lean().exec();
+        return res.status(201).send(jobs);
+    } catch (e){
+        return res.status(500).send({e})
+    }
+});
+
+app.get("/wfh", async (req, res) =>{
+    try{
+        const jobs = await Job.find({job_type:"Work From Home"}).lean().exec();
+        return res.status(201).send(jobs);
+    } catch (e){
+        return res.status(500).send({e})
+    }
+});
+
+app.get("/notice", async (req, res) =>{
+    try{
+        const jobs = await Job.find({notice_period:60}).lean().exec();
+        return res.status(201).send(jobs);
+    } catch (e){
+        return res.status(500).send({e})
+    }
+});
+
+app.get("/rating", async (req, res) =>{
+    try{
+        const jobs = await Job.find({},{job_name:1, rating:1}).sort({rating:-1}).lean().exec();
         return res.status(201).send(jobs);
     } catch (e){
         return res.status(500).send({e})
